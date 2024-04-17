@@ -12,7 +12,7 @@ LearningX에서 영상 마감일은 나오지 않는 단점을 수정한 프로�
 
 [사용법] 
 1. Chrome과 해당버전에 맞는 ChromeDriver를 설치합니다.
-2. LMS_helper.py에서 id와 pw를 입력하세요.
+2. LMS_helper.py를 설치한 후 코드에 id와 pw를 입력하세요.
 3. 코드를 python이 호환되는 환경에서 실행시킵니다.
 
 
