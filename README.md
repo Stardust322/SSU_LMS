@@ -1,6 +1,7 @@
-# SSU_LMS AutoLogin + get_AssignmentInfo \n (v0.0.1 2024.04.18 released.)
+# SSU_LMS AutoLogin + get_AssignmentInfo
+#(v0.0.1 2024.04.18 released.)
 
-WebDriver를 이용해 lms 자동로그인 + 과제 및 영상 마감정보 가져오기\n
+WebDriver를 이용해 lms 자동로그인 + 과제 및 영상 마감정보 가져오기
 LearningX에서 영상 마감일은 나오지 않는 단점을 수정한 프로그램입니다.
 
 [사용법] 
