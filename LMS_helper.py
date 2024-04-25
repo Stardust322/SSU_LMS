@@ -7,7 +7,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 
-# 중요도 판별 함수 - 오름차순 정렬렬
+# 중요도 판별 함수 - 오름차순 정렬
 def day_check(time):
     if time.startswith("D-"):
         return 24 * int(time.split("D-")[1])
@@ -81,7 +81,7 @@ def SSU_login(id, pw):
         print(sub_info[i][0],"\n남은기한 :",str(day).replace("999999","기한 제한없음"),"\n\n")
     
 
-#GUI 구현 - Tkinter
+# GUI 구현 - Tkinter
 win = Tk()
 win.title("SSU lms Log-In")
 win.geometry("400x300")
