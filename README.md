@@ -1,6 +1,8 @@
 # SSU_LMS AutoLogin + get_AssignmentInfo
-v0.0.3 (2024.04.18 released, 2024.04.26 updated.)
-+ 로그인 UI 구현, 과제 마감일 기준 오름차순 정렬 구현.
+v1.0 (2024.04.18 released, 2024.05.01 updated.)
++ 전체 UI 지원 및 터미널 출력 지원 종료.
++ 최근 로그인정보로 바로 로그인하는 기능 추가
++ 로그인 UI 개선
 
 
 WebDriver를 이용해 lms 자동로그인 + 과제 및 영상 마감정보 가져오기
