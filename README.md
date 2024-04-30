@@ -1,6 +1,6 @@
 # SSU_LMS AutoLogin + get_AssignmentInfo
 v1.0 (2024.04.18 released, 2024.05.01 updated.)
-+ 전체 UI 지원 및 터미널 출력 지원 종료.
++ 전체 UI 지원 및 터미널 출력 지원 종료
 + 최근 로그인정보로 바로 로그인하는 기능 추가
 + 로그인 UI 개선
 
