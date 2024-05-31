@@ -1,6 +1,7 @@
 # LMS_Helper - tkinter
 v1.1 (2024.04.18 released, 2024.06.01 updated.)
 + 코드 최적화 (average -12 second.)
++ 로딩 타이머 삭제
 + 결과 UI에 이름 표기
 
 
