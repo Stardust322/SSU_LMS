@@ -6,13 +6,12 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-#from webdriver_manager.chrome import ChromeDriverManager
 
 assign_num_text = "\n"
 assign_name_list = []
 assign_time_list = []
+stu_name = ""
 
-# 중요도 판별 함수 - 오름차순 정렬
 def day_check(time):
     if time.startswith("D-"):
         return 24 * int(time.split("D-")[1])
@@ -22,12 +21,13 @@ def day_check(time):
         return int(time.split("시간 전")[0])
     else:
         return 999999
-
-# 자동로그인 함수
+    
 def SSU_login(id, pw):
+    start = time.time()
     global assign_num_text
     global assign_name_list
     global assign_time_list
+    global stu_name
     URL = "https://smartid.ssu.ac.kr/Symtra_sso/smln.asp?apiReturnUrl=https%3A%2F%2Flms.ssu.ac.kr%2Fxn-sso%2Fgw-cb.php"
     
     chrome_options = Options()
@@ -41,30 +41,24 @@ def SSU_login(id, pw):
     user_pw = driver.find_element(By.ID, 'pwd')
     user_pw.send_keys(pw)
     user_pw.send_keys(Keys.RETURN)
-
-    driver.implicitly_wait(5)
-
-    my_page = driver.find_element(By.XPATH, '//*[@id="xnm2_content"]/div[1]/div[1]/div[1]/div/a')
-    my_page.click()
-
-    driver.implicitly_wait(5)
+    driver.implicitly_wait(1)
+    name = driver.find_element(By.XPATH,'//*[@id="header"]/nav/div/div[1]/div[3]/div[2]/div/button/span')
     
+    stu_name = str(name.text).split("(")[0]
+    time.sleep(0.5)
     driver.get("https://canvas.ssu.ac.kr/learningx/dashboard?user_login="+str(id)+"&locale=ko")
-
-    time.sleep(3)
-    driver.implicitly_wait(10)
+    driver.implicitly_wait(3)
 
     sub_name = driver.find_elements(By.CLASS_NAME,"xnscc-header-title")
-
     for i in range(len(sub_name)):
+
         driver.find_element(By.XPATH,'//*[@id="root"]/div/div/div[2]/div[2]/div/div['+ str(i+1) +']/div/div[1]/button').click()
-    
+
     assign = driver.find_elements(By.CLASS_NAME,"xn-student-todo-item-container")
- 
     menu_info = ["동영상","화상강의","대면수업출결","과제","퀴즈","토론"]
     menu_num = driver.find_elements(By.CLASS_NAME, "xnhti-count")
 
-    for i in range(len(menu_num)):       
+    for i in range(len(menu_num)):
         assign_num_text += str(menu_info[i]) + " : "+str(menu_num[i].text)+"\n"
 
     day_info = []
@@ -86,6 +80,8 @@ def SSU_login(id, pw):
         day = day_info[day_import.index(sub_info[i][1])]
         assign_name_list.append(sub_info[i][0])
         assign_time_list.append(f"({str(day).replace("999999","기한 X")})")
+    end = time.time()
+    #print(round(end - start, 3))
         
 #GUI 구현
 win = Tk()
@@ -105,7 +101,6 @@ lab1.place(relx=0.1,rely=0.2)
 ent1 = Entry(win)
 ent1.insert(0,"학번(작번)")
 
-# ID란 Clear함수수
 def clear(event):
     if ent1.get() == "학번(작번)":
         ent1.delete(0,len(ent1.get()))
@@ -124,7 +119,6 @@ ent2.place(relx=0.1,rely=0.5)
 btn = Button(win)
 btn.config(text="LOGIN")
 
-# 로그인 성공 및 실패 판별 함수
 def login():
     try:
         SSU_login(ent1.get(), ent2.get())
@@ -135,13 +129,12 @@ def login():
     except:
         lab3.config(text="LOGIN Fail.")
 
-# 타이머 함수
 def start_timer():
     timer.config(state="disabled") 
-    countdown(5)  
+    countdown(1)  
 
-# 카운트다운 함수수
 def countdown(seconds):
+    global stu_name
     if seconds > 3:
         
         timer.after(1000, countdown, seconds-1)
@@ -161,16 +154,16 @@ def countdown(seconds):
 
         r_id = open("recent_login.txt","r").read().split("\n")[0]
         user_info = Button(win2)
-        user_info.config(text=f"학번 : {r_id}")
+        user_info.config(text=f"이름 : {stu_name}\n학번 : {r_id}")
         user_info.place(relx=0.1,rely=0.1)
 
         assign_list = Button(win2)
         assign_list.config(text=assign_num_text)
-        assign_list.place(relx=0.1,rely=0.17)
+        assign_list.place(relx=0.1,rely=0.20)
         
         danger_num = 0
         attent_num = 0
-        safety_num = 0
+        safety_num = 0 
         finish_num = 0
         
         for i in range(len(assign_name_list)):
@@ -249,7 +242,6 @@ lab3.place(relx=0.37,rely=0.8)
 btn2 = Button(win)
 btn2.config(text="최근 로그인")
 
-# 최근 로그인 정보 기반 로그인 함수
 def recent_login():    
     r_id = open("recent_login.txt","r").read().split("\n")[0]
     r_pw = open("recent_login.txt","r").read().split("\n")[1]
