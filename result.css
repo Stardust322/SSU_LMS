@@ -1,0 +1,183 @@
+body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .loading span {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: gray;
+            border-radius: 50%;
+            animation: loading 1s 0s linear infinite;
+        }
+
+        .loading span:nth-child(1) {
+            animation-delay: 0s;
+            background-color: red;
+        }
+
+        .loading span:nth-child(2) {
+            animation-delay: 0.2s;
+            background-color: orange;
+        }
+
+        .loading span:nth-child(3) {
+            animation-delay: 0.4s;
+            background-color: yellowgreen;
+        }
+
+        @keyframes loading {
+            0%, 100% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        .task-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+
+        .task-container h2 {
+            margin-bottom: 20px;
+            background-color: #003366;
+            color: white;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: grey;
+        }
+
+        #taskList {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #taskList li {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .task-checkbox {
+            margin-right: 10px;
+        }
+
+        .pagination {
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            padding: 5px 10px;
+            margin: 0 5px;
+        }
+
+        .pagination span {
+            font-size: 1em;
+        }
+
+        footer {
+            position: absolute;
+            bottom: 10px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .loader {
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid #3498db;
+            width: 120px;
+            height: 120px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .content {
+            display: none;
+        }
+
+        center {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .red {
+            margin-right: 10px;
+            color: red;
+            text-shadow: 1px 1px 1px #000;
+        }
+
+        .yellow {
+            margin-right: 10px;
+            color: yellow;
+            text-shadow: 1px 1px 1px #000;
+        }
+
+        .green {
+            margin-right: 10px;
+            color: green;
+            text-shadow: 1px 1px 1px #000;
+        }
+
+        .black {
+            margin-right: 10px;
+            color: white;
+            background-color: black;
+        }
+
+        .fireworks {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .fireworks canvas {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        
+
+        .congrats-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2em;
+            color: white;
+            z-index: 10000;
+            text-align: center;
+        }
+
+        .congrats-message{
+            background-color: #003366;
+            color: white;
+        }
