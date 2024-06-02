@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>과제 목록</title>
+    <link rel="stylesheet" type="text/css" href="result.css" />
+
+</head>
+<body>
+  <!-- 로딩 화면 -->
+    <div class="loading">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <div class="content">
+        <div class="task-container">
+            <h2>과제 목록</h2>
+            <ul id="taskList">
+                <!-- 과제 목록은 JavaScript로 동적으로 생성 -->
+            </ul>
+            <div class="pagination">
+                <button id="prevPage" disabled>이전</button>
+                <span id="pageInfo"></span>
+                <button id="nextPage">다음</button>
+            </div>
+        </div>
+    </div>
+
+  <!-- 축하메시지는 JavaScript로 동작 -->
+    <div class="fireworks" id="fireworks">
+        <canvas></canvas>
+        <div class="congrats-message" id="congratsMessage">과제 완료!</div>
+    </div>
+    <footer>
+        <center>Copyrights 2024. Lee SangHwa All rights reserved.</center>
+    </footer>
+    <script src="result.js">
+</body>
+</html>
