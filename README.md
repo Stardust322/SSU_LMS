@@ -6,7 +6,7 @@ Tkinter v1.1 (2024.04.18 released, 2024.06.01 updated.)
 
 
 Flask v1.0 (2024.06.03 released.)
-+LMS_Helper Web환경 지원
++ LMS_Helper Web환경 지원
 
 
 WebDriver를 이용해 lms 자동로그인 + 과제 및 영상 마감정보 가져오기
