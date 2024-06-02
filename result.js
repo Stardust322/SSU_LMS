@@ -172,3 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 renderTasks();
             }, 2000); // 2초 후에 로딩 화면을 숨기고 실제 콘텐츠를 보여줌
         });
+      window.addEventListener('load', function() {
+        localStorage.clear();
+        renderTasks();
+        });
