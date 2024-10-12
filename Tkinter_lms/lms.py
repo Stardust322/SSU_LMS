@@ -1,177 +1,117 @@
-import selenium
-import time
-from tkinter import *
-import tkinter.font
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
+import os
+import tkinter as tk
+import tkinter.font as tkFont
+from tkinter import messagebox
+from PIL import Image, ImageTk
+import PIL.Image
+from module import SSU_login, get_weather, check_status
 
-assign_num_text = "\n"
-assign_name_list = []
-assign_time_list = []
-stu_name = ""
-
-def day_check(time):
-    if time.startswith("D-"):
-        return 24 * int(time.split("D-")[1])
-    elif time == "마감됨":
-        return 1000000
-    elif time.endswith("시간 전"):
-        return int(time.split("시간 전")[0])
-    else:
-        return 999999
-    
-def SSU_login(id, pw):
-    start = time.time()
-    global assign_num_text
-    global assign_name_list
-    global assign_time_list
-    global stu_name
-    URL = "https://smartid.ssu.ac.kr/Symtra_sso/smln.asp?apiReturnUrl=https%3A%2F%2Flms.ssu.ac.kr%2Fxn-sso%2Fgw-cb.php"
-    
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument('--window-size=1500,1500')
-    driver = webdriver.Chrome(options=chrome_options)
-    driver.get(URL)
-    user_id = driver.find_element(By.ID,'userid')
-    user_id.send_keys(id)
-
-    user_pw = driver.find_element(By.ID, 'pwd')
-    user_pw.send_keys(pw)
-    user_pw.send_keys(Keys.RETURN)
-    driver.implicitly_wait(1)
-    name = driver.find_element(By.XPATH,'//*[@id="header"]/nav/div/div[1]/div[3]/div[2]/div/button/span')
-    
-    stu_name = str(name.text).split("(")[0]
-    time.sleep(0.5)
-    driver.get("https://canvas.ssu.ac.kr/learningx/dashboard?user_login="+str(id)+"&locale=ko")
-    driver.implicitly_wait(3)
-
-    sub_name = driver.find_elements(By.CLASS_NAME,"xnscc-header-title")
-    for i in range(len(sub_name)):
-
-        driver.find_element(By.XPATH,'//*[@id="root"]/div/div/div[2]/div[2]/div/div['+ str(i+1) +']/div/div[1]/button').click()
-
-    assign = driver.find_elements(By.CLASS_NAME,"xn-student-todo-item-container")
-    menu_info = ["동영상","화상강의","대면수업출결","과제","퀴즈","토론"]
-    menu_num = driver.find_elements(By.CLASS_NAME, "xnhti-count")
-
-    for i in range(len(menu_num)):
-        assign_num_text += str(menu_info[i]) + " : "+str(menu_num[i].text)+"\n"
-
-    day_info = []
-    day_import = [] 
-    sub_info = {}
-
-    for i in range(len(assign)):
-        data = str(assign[i].text).split("\n")
-        if len(data) > 1:
-            day_info.append(str(assign[i].text).split("\n")[1])
+class App:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("SSU lms")
+        self.root.geometry("800x400")
+        self.current_frame = None
+        self.current_subframe = None
+        self.font_size = 16
+        self.path = "app_data/recent_login.txt"
+        self.dark_path = "app_data/status.txt"
+        self.logo_path = "app_data/header_logo.png"
+        isDark_mode = int(open(self.dark_path,"r").read())
+        if isDark_mode == 1:
+            self.bg, self.fg, self.fg_gray = "black", "white", "white"
         else:
-            day_info.append("999999")
-        day_import.append(day_check(day_info[i]))
-        sub_info[data[0]] = day_check(day_info[i])
+            self.bg, self.fg, self.fg_gray= "white", "black", "gray"
+        self.version = "1.4.0"
+        #if os.path.isfile("app_info.txt") == False:
+            #f = open(self.path, "w")
+            #f.write("{}")
+            #f.close()
+        if os.path.isfile(self.path):
+            self.id, self.pw = open(self.path,"r").read().split("\n")
+            name_list, time_list, student_name = SSU_login(self.id, self.pw)
+            self.main_page(name_list, time_list, student_name)
+        else:
+            self.login_page()
+
+    def login_page(self):
+        self.clear_frame()
+        self.clear_subframe()
+        self.current_frame = tk.Frame(self.root, width=800, height=400)
+        self.current_frame.pack()
+        Login_fontStyle = tkFont.Font(family="Lucida Grande",size=18)
+        logo_img = tk.Label(self.current_frame)
+        self.img = tk.PhotoImage(file=self.logo_path, master = self.current_frame)
+        logo_img.config(image=self.img)
+        logo_img.place(relx=0.1,rely=0.34)
         
-    sub_info = sorted(sub_info.items(), key = lambda item: item[1])
 
-    for i in range(len(sub_info)):
-        day = day_info[day_import.index(sub_info[i][1])]
-        assign_name_list.append(sub_info[i][0])
-        assign_time_list.append(f"({str(day).replace("999999","기한 X")})")
-    end = time.time()
-    #print(round(end - start, 3))
+        ID_label = tk.Label(self.current_frame, font=Login_fontStyle)
+        ID_label.config(text="ID")
+        ID_label.place(relx=0.55,rely=0.23)
+
+        ID_entry = tk.Entry(self.current_frame, font=Login_fontStyle)
+        ID_entry.insert(0,"학번(작번)")
+
+        def clear(event):
+            if ID_entry.get() == "학번(작번)":
+                ID_entry.delete(0,len(ID_entry.get()))
+
+        ID_entry.bind("<Button-1>",clear)
+        ID_entry.place(relx=0.55,rely=0.3)
+
+        PW_label = tk.Label(self.current_frame, font=Login_fontStyle)
+        PW_label.config(text="Password")
+        PW_label.place(relx=0.55,rely=0.42)
+
+        PW_entry = tk.Entry(self.current_frame, font=Login_fontStyle)
+        PW_entry.config(show="*")
+        PW_entry.place(relx=0.55,rely=0.5)
+
+        LOGIN_btn = tk.Button(self.current_frame, font=Login_fontStyle, width=20,bg="deep sky blue")
+        def login():
+            id = ID_entry.get()
+            pw = PW_entry.get()
+            try:
+                name_list, time_list, student_name = SSU_login(id, pw)
+                f = open(self.path, "w")
+                f.write(f"{id}\n{pw}")
+                f.close()
+                self.main_page(name_list, time_list, student_name)
+            except:
+                messagebox.showerror("LOGIN Fail", "학번 또는 비밀번호가 잘못되었습니다.")
+        LOGIN_btn.config(text="LOGIN", command=login)
+        LOGIN_btn.place(relx=0.548, rely=0.591)
+
+    def main_page(self, name_list, time_list, student_name):
+        self.clear_frame()
+        self.clear_subframe()
+        self.current_subframe = tk.Frame(self.root, width=270, height=400,bg="pale turquoise")
+        self.current_frame = tk.Frame(self.root, width=530, height=400, bg=self.bg)
+        self.current_subframe.pack(side="left")
+        self.current_frame.pack(side="right")
+
+        logo_img = tk.Label(self.current_subframe)
+        self.img= tk.PhotoImage(file=self.logo_path, master = self.current_subframe)
+        logo_img.config(image=self.img, bg="pale turquoise")
+        logo_img.place(relx=0.05,rely=0.34)
+
+        Main_fontStyle = tkFont.Font(family="Lucida Grande",size=18)
+        Name_label = tk.Label(self.current_subframe, font=Main_fontStyle, text=f"{student_name} 학생\n학번 : {self.id}")
+        Name_label.place(relx=0.16, rely=0.63)
         
-#GUI 구현
-win = Tk()
-win.title("SSU lms Log-In")
-win.geometry("400x300")
-win.option_add("*Font","궁서 20")
+        Task_label = tk.Label(self.current_frame, font=Main_fontStyle, text="Tasks List", fg=self.fg, bg=self.bg)
+        Task_label.place(relx=0.04, rely=0.08)
 
-lab_d = Label(win)
-img = PhotoImage(file="header_logo.png", master = win)
-lab_d.config(image=img)
-lab_d.place(relx=0.25,rely=0.01)
-
-lab1 = Label(win)
-lab1.config(text="ID")
-lab1.place(relx=0.1,rely=0.2)
-
-ent1 = Entry(win)
-ent1.insert(0,"학번(작번)")
-
-def clear(event):
-    if ent1.get() == "학번(작번)":
-        ent1.delete(0,len(ent1.get()))
-
-ent1.bind("<Button-1>",clear)
-ent1.place(relx=0.1,rely=0.3)
-
-lab2 = Label(win)
-lab2.config(text="Password")
-lab2.place(relx=0.1,rely=0.4)
-
-ent2 = Entry(win)
-ent2.config(show="*")
-ent2.place(relx=0.1,rely=0.5)
-
-btn = Button(win)
-btn.config(text="LOGIN")
-
-def login():
-    try:
-        SSU_login(ent1.get(), ent2.get())
-        lab3.config(text="Success.")
-        f = open("recent_login.txt","w")
-        f.write(ent1.get()+"\n"+ent2.get())
-        f.close()
-    except:
-        lab3.config(text="LOGIN Fail.")
-
-def start_timer():
-    timer.config(state="disabled") 
-    countdown(1)  
-
-def countdown(seconds):
-    global stu_name
-    if seconds > 3:
-        
-        timer.after(1000, countdown, seconds-1)
-    elif seconds <= 3 and seconds > 0:
-        lab3.destroy()
-        timer.config(text=f"Loading... {seconds}s")
-        timer.after(1000, countdown, seconds-1)  
-    else:
-        win2 = Tk()
-        win2.title("SSU Dashboard")
-        win2.geometry("1200x800")
-        win2.option_add("*Font","궁서 20")
-        lab_d = Label(win2)
-        img = PhotoImage(file="header_logo.png", master = win2)
-        lab_d.config(image=img)
-        lab_d.place(relx=0.4,rely=0.01)
-
-        r_id = open("recent_login.txt","r").read().split("\n")[0]
-        user_info = Button(win2)
-        user_info.config(text=f"이름 : {stu_name}\n학번 : {r_id}")
-        user_info.place(relx=0.1,rely=0.1)
-
-        assign_list = Button(win2)
-        assign_list.config(text=assign_num_text)
-        assign_list.place(relx=0.1,rely=0.20)
-        
-        danger_num = 0
-        attent_num = 0
-        safety_num = 0 
-        finish_num = 0
-        
-        for i in range(len(assign_name_list)):
-            font = tkinter.font.Font(size=12)
+        n = len(name_list) if len(name_list) < 8 else 8
+    
+        Task_fontStyle = tkFont.Font(family="Lucida Grande", size=10)
+        danger_num, attent_num, safety_num, finish_num = 0, 0, 0, 0
+        for i in range(n):
             bg_c = ""
             ft_c = ""
-            a = Button(win2)
-            rest_time = assign_time_list[i]
+            Task_btn = tk.Button(self.current_frame, font=Task_fontStyle)
+            rest_time = time_list[i]
             rest_time_rep = str(rest_time).replace("(","").replace(")","")
 
             if rest_time_rep.startswith("D-"):
@@ -187,10 +127,11 @@ def countdown(seconds):
                 bg_c = "black"
                 ft_c = "white"
                 finish_num += 1
-            elif rest_time_rep.endswith("시간 전"):
+            elif rest_time_rep.endswith("시간 전") or rest_time_rep.endswith("분 전"):
                 bg_c = "red"
                 ft_c = "black"
                 danger_num += 1
+            
             elif rest_time_rep == "기한 X":
                 bg_c = "green"
                 ft_c = "white"
@@ -199,56 +140,159 @@ def countdown(seconds):
                 bg_c = "white"
                 ft_c = "black"
             
-            a.config(text=str(assign_name_list[i])+" "+str(rest_time), font=font, width=58, bg=bg_c, fg=ft_c)
-            a.place(relx=0.338, rely=0.1+(0.045*i))
+            Task_btn.config(text=str(name_list[i])+" "+str(rest_time), width=60, bg=bg_c, fg=ft_c)
+            Task_btn.place(relx=0.04, rely=0.2+(0.08*i))
 
-        danger_btn = Button(win2)
-        danger_btn.config(text=f"위험 : {danger_num}개",bg="red",fg="black",width=13,height=3)
-        danger_btn.place(relx=0.1,rely=0.5)
-
-        attent_btn = Button(win2)
-        attent_btn.config(text=f"주의 : {attent_num}개",bg="yellow",fg="black",width=13,height=3)
-        attent_btn.place(relx=0.1,rely=0.6)
-
-        safety_btn = Button(win2)
-        safety_btn.config(text=f"안전 : {safety_num}개",bg="green",fg="black",width=13,height=3)
-        safety_btn.place(relx=0.1,rely=0.7)
-
-        finish_btn = Button(win2)
-        finish_btn.config(text=f"마감됨 : {finish_num}개",bg="black",fg="white",width=13,height=3)
-        finish_btn.place(relx=0.1,rely=0.8)
-
-        win.destroy()
+        def go_main():
+            self.main_page(name_list, time_list, student_name)
         
-        timer.config(state="normal")
+        def go_setting():
+            self.setting_page()
 
-timer = Label(win, text="")
-timer.place(relx=0.28, rely=0.8)
+        def go_weather():
+            self.weather_page()
+        
+        def go_bab():
+            self.bab_page()
+        
+        def go_gpt():
+            self.gpt_page()
 
-def ult_login():
-    start_timer()
-    login()
+        btn_fontStyle = tkFont.Font(family="Lucida Grande",size=10)
+        btn_width, btn_height, btn_dist = 6, 4, 0.2
+        bab_btn = tk.Button(self.current_subframe, font=btn_fontStyle, width=btn_width, height=btn_height)
+        bab_btn.config(text="학식", command=go_bab)
+        bab_btn.place(relx=0.0, rely=0.86)
 
-def ult_recent_login():
-    start_timer()
-    recent_login()
+        Wea_btn = tk.Button(self.current_subframe, font=btn_fontStyle, width=btn_width, height=btn_height)
+        Wea_btn.config(text="날씨", command=go_weather)
+        Wea_btn.place(relx=btn_dist * 1, rely=0.86)
 
-btn.config(command=ult_login)
-btn.place(relx=0.1,rely=0.6)
+        Home_btn = tk.Button(self.current_subframe, font=btn_fontStyle, width=btn_width, height=btn_height)
+        Home_btn.config(text="홈", command=go_main)
+        Home_btn.place(relx=btn_dist * 2, rely=0.86)
 
-lab3 = Label(win)
-lab3.place(relx=0.37,rely=0.8)
+        dday_btn = tk.Button(self.current_subframe, font=btn_fontStyle, width=btn_width, height=btn_height)
+        dday_btn.config(text="GPT", command=go_gpt)
+        dday_btn.place(relx=btn_dist * 3, rely=0.86)
+        
+        setting_btn = tk.Button(self.current_subframe, font=btn_fontStyle, width=btn_width, height=btn_height)
+        setting_btn.config(text="설정", command=go_setting)
+        setting_btn.place(relx=btn_dist * 4, rely=0.86)
 
-btn2 = Button(win)
-btn2.config(text="최근 로그인")
+    def load_settings(self):
+        try:
+            with open(self.dark_path, 'r') as file:
+                dark_mode_status = int(file.read().strip())
+                if dark_mode_status == 1:
+                    self.bg, self.fg, self.fg_gray = "black", "white", "white"
+                else:
+                    self.bg, self.fg, self.fg_gray = "white", "black", "gray"
+        except FileNotFoundError:
+            pass
 
-def recent_login():    
-    r_id = open("recent_login.txt","r").read().split("\n")[0]
-    r_pw = open("recent_login.txt","r").read().split("\n")[1]
-    SSU_login(r_id, r_pw)
-    lab3.config(text="Success")
+    def setting_page(self):
+        self.clear_frame()
+        self.current_frame = tk.Frame(self.root, width=530, height=400, bg=self.bg)
+        self.current_frame.pack(side="right")
 
-btn2.config(command=ult_recent_login)
-btn2.place(relx=0.45, rely=0.6)
+        Setting_fontStyle = tkFont.Font(family="Lucida Grande", size=18)
+        Version_fontStyle = tkFont.Font(family="Lucida Grande", size=9)
+        Title_fontStyle = tkFont.Font(family="Lucida Grande", size=12)
+        Subtitle_fontStyle = tkFont.Font(family="Lucida Grande", size=10)
 
-win.mainloop()
+        def Logout():
+            response = messagebox.askokcancel("LogOut", "로그아웃 하시겠습니까?")
+            if response:
+                os.remove(self.path)
+                self.login_page()
+
+        Setting_label = tk.Label(self.current_frame, font=Setting_fontStyle, text="Setting", fg=self.fg, bg=self.bg)
+        Setting_label.place(relx=0.04, rely=0.08)
+
+        def save_status():
+            with open(self.dark_path, 'w') as file:
+                file.write('%s' % CheckVar1.get())
+            
+            if CheckVar1.get() == 1:
+                self.bg, self.fg, self.fg_gray = "black", "white", "white"
+            else:
+                self.bg, self.fg, self.fg_gray = "white", "black", "gray"
+            self.setting_page()
+
+        CheckVar1 = tk.IntVar(value=1 if self.bg == "black" else 0)
+        Darkmode_check = tk.Checkbutton(self.current_frame, text="다크 모드", font=Title_fontStyle, fg=self.fg, bg=self.bg, variable=CheckVar1, command=save_status)
+        Darkmode_check.place(relx=0.04, rely=0.2)
+
+        Darkmode_subtitle = tk.Label(self.current_frame, font=Subtitle_fontStyle, text="어두운 화면으로 시력을 보호합니다.", fg=self.fg_gray, bg=self.bg)
+        Darkmode_subtitle.place(relx=0.25, rely=0.208)
+
+        Logout_btn = tk.Button(self.current_frame, font=Title_fontStyle, text="로그아웃", fg="red", command=Logout)
+        Logout_btn.place(relx=0.04, rely=0.80)
+
+        Version_label = tk.Label(self.current_frame, font=Version_fontStyle, text=f"Version {self.version} / Copyrights 2024. Lee SangHwa All rights reserved.", fg=self.fg_gray, bg=self.bg)
+        Version_label.place(relx=0.15, rely=0.94)
+
+    def weather_page(self):
+        self.clear_frame()
+        self.current_frame = tk.Frame(self.root, width=530, height=400, bg=self.bg)
+        self.current_frame.pack(side="right")
+        Weather_fontStyle = tkFont.Font(family="Lucida Grande",size=18)
+        weather_data = get_weather()
+
+        locate_label = tk.Label(self.current_frame, font=Weather_fontStyle, text="숭실대학교의 날씨", fg=self.fg, bg=self.bg)
+        locate_label.place(relx=0.04, rely=0.08)
+        
+        temperture_label = tk.Label(self.current_frame, font=tkFont.Font(size=20), text=weather_data[1], fg=self.fg, bg=self.bg)
+        temperture_label.place(relx=0.45, rely=0.4)
+
+        original_image = Image.open(weather_data[7])
+        resized_image = original_image.resize((68, 68), Image.LANCZOS)  
+        self.img1 = ImageTk.PhotoImage(resized_image)
+        logo_img = tk.Label(self.current_frame)
+        logo_img.config(image=self.img1 , bg=self.bg)
+        logo_img.place(relx=0.325, rely=0.3)
+
+        subinfo_label1 = tk.Label(self.current_frame, font=tkFont.Font(size=14), text=f"어제보다 {weather_data[2]} / {weather_data[0]}", fg=self.fg, bg=self.bg)
+        subinfo_label1.place(relx=0.3, rely=0.48)
+
+        subinfo_label2 = tk.Label(self.current_frame, font=tkFont.Font(size=8), text=f"체감기온 {weather_data[3]}ㆍ습도 {weather_data[4]}ㆍ{weather_data[6]} {weather_data[5]}", fg=self.fg, bg=self.bg)
+        subinfo_label2.place(relx=0.3, rely=0.54)
+        title = ["미세 먼지", "초미세먼지", " 자외선 "]
+        dist = [0, 0.125, 0.27]
+        for i in range(3):
+            stat_btn = tk.Button(self.current_frame, font=tkFont.Font(size=9), text=f"{title[i]}\n{weather_data[8+i]}", bg=check_status(weather_data[8+i])[0], fg=check_status(weather_data[8+i])[1])
+            stat_btn.place(relx=0.3 + dist[i], rely=0.58)
+
+    def bab_page(self):
+        self.clear_frame()
+        self.current_frame = tk.Frame(self.root, width=530, height=400, bg=self.bg)
+        self.current_frame.pack(side="right")
+        Bab_fontStyle = tkFont.Font(family="Lucida Grande",size=18)
+
+        Bab_label = tk.Label(self.current_frame, font=Bab_fontStyle)
+        Bab_label.config(text="오늘의 학식", fg=self.fg, bg=self.bg)
+        Bab_label.place(relx=0.04, rely=0.08)
+
+    def gpt_page(self):
+        self.clear_frame()
+        self.current_frame = tk.Frame(self.root, width=530, height=400, bg=self.bg)
+        self.current_frame.pack(side="right")
+        Dday_fontStyle = tkFont.Font(family="Lucida Grande",size=18)
+
+        Dday_label = tk.Label(self.current_frame, font=Dday_fontStyle)
+        Dday_label.config(text="GPT", fg=self.fg, bg=self.bg)
+        Dday_label.place(relx=0.04, rely=0.08)
+
+    def clear_frame(self):
+        if self.current_frame is not None:
+            self.current_frame.destroy()
+    
+    def clear_subframe(self):
+        if self.current_subframe is not None:
+            self.current_subframe.destroy()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = App(root)
+    root.mainloop()
