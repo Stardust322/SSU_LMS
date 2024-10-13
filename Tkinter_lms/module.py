@@ -106,14 +106,14 @@ def get_weather():
     
     if "맑음" in status:
         sub = "_night" if sunset == "일출" else ""
-        path = f"app_data/weather/sunny{sub}.png"
+        path = f"Tkinter_lms/app_data/weather/sunny{sub}.png"
     elif "구름" in status:
         sub = "_night" if sunset == "일출" else ""
-        path = f"app_data/weather/so_cloud{sub}.png"
+        path = f"Tkinter_lms/app_data/weather/so_cloud{sub}.png"
     elif "흐림" in status:
-        path = f"app_data/weather/cloud.png"
+        path = f"Tkinter_lms/app_data/weather/cloud.png"
     elif "비" in status:
-        path = f"app_data/weather/rain.png"
+        path = f"Tkinter_lms/app_data/weather/rain.png"
     return status, temp, yest_temp, feel_tem, mort, wind, direction, path, dust, small_dust, sun, sunset, sun
 
 def check_status(status):

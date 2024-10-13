@@ -14,15 +14,15 @@ class App:
         self.current_frame = None
         self.current_subframe = None
         self.font_size = 16
-        self.path = "app_data/recent_login.txt"
-        self.dark_path = "app_data/status.txt"
-        self.logo_path = "app_data/header_logo.png"
+        self.path = "Tkinter_lms/app_data/recent_login.txt"
+        self.dark_path = "Tkinter_lms/app_data/status.txt"
+        self.logo_path = "Tkinter_lms/app_data/header_logo.png"
         isDark_mode = int(open(self.dark_path,"r").read())
         if isDark_mode == 1:
             self.bg, self.fg, self.fg_gray = "black", "white", "white"
         else:
             self.bg, self.fg, self.fg_gray= "white", "black", "gray"
-        self.version = "1.4.0"
+        self.version = "1.4.1"
         #if os.path.isfile("app_info.txt") == False:
             #f = open(self.path, "w")
             #f.write("{}")
