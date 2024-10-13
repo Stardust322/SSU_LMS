@@ -1,10 +1,8 @@
 # SSU_lms
-Tkinter v1.4.0 (2024.04.18 released, 2024.10.12 updated.)
-  + 로그인 유지 기능 추가
-  + Login Page, Main Page UI 수정
-  + 날씨 기능 추가 
-  + 다크모드 지원
-  + 로그아웃 기능 추가
+Tkinter v1.4.1 (2024.04.18 released, 2024.10.13 updated.)
+> v1.4.1 변경점.
+>> + No such file 버그 수정
+>> + 다크모드 초기 값을 비활성으로 수정
 
 
 Flask v1.0 (2024.06.03 released.)
