@@ -74,6 +74,7 @@ class App:
             pw = PW_entry.get()
             try:
                 name_list, time_list, student_name = SSU_login(id, pw)
+                self.id, self.pw = id, pw
                 f = open(self.path, "w")
                 f.write(f"{id}\n{pw}")
                 f.close()

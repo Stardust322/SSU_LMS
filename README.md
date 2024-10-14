@@ -1,8 +1,8 @@
 # SSU_lms
-Tkinter v1.4.1 (2024.04.18 released, 2024.10.13 updated.)
-> v1.4.1 변경점.
->> + No such file 버그 수정
->> + 다크모드 초기 값을 비활성으로 수정
+Tkinter v1.4.2 (2024.04.18 released, 2024.10.15 updated.)
+> v1.4.2 변경점.
+>> + 로그아웃 후 다른 계정으로 로그인 시 이전 계정 정보를 가져오는 문제점 수정
+>> + recent_login.txt 파일 삭제
 
 WebDriver를 이용해 lms 자동로그인 + 과제 및 영상 마감정보 가져오기
 
