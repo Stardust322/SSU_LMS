@@ -6,6 +6,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from flask import Flask
 from flask import request, redirect, url_for
+# Flask version 지원종료.
 
 assign_num_text = "\n"
 assign_name_list = []
