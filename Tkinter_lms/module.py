@@ -10,10 +10,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 import requests
 
-assign_num_text = "\n"
-assign_name_list = []
-assign_time_list = []
-stu_name = ""
+
 
 def day_check(time):
     if time.startswith("D-"):
@@ -29,10 +26,10 @@ def day_check(time):
     
 def SSU_login(id, pw):
     start = time.time()
-    global assign_num_text
-    global assign_name_list
-    global assign_time_list
-    global stu_name
+    assign_num_text = "\n"
+    assign_name_list = []
+    assign_time_list = []
+    stu_name = ""
     URL = "https://smartid.ssu.ac.kr/Symtra_sso/smln.asp?apiReturnUrl=https%3A%2F%2Flms.ssu.ac.kr%2Fxn-sso%2Fgw-cb.php"
     
     chrome_options = Options()
