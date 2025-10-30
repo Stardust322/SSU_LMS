@@ -3,27 +3,27 @@ import tkinter as tk
 import tkinter.font as tkFont
 from tkinter import messagebox
 from PIL import Image, ImageTk
-from module import SSU_login, get_weather, check_status
+from module import SSU_login, get_weather, check_status, open_url
 
 class App:
     def __init__(self, root):
         self.root = root
-        self.root.title("SSU lms")
+        self.root.title("SoongSil University lms")
         self.root.geometry("800x400")
         self.current_frame, self.current_subframe = None, None
         self.font_size = 16
-        self.recent_path = "Tkinter_lms/app_data/recent_login.txt"
-        self.dark_path = "Tkinter_lms/app_data/status.txt"
-        self.logo_path = "Tkinter_lms/app_data/header_logo.png"
+        self.recent_path = "SSU_LMS/app_data/recent_login.txt"
+        self.dark_path = "SSU_LMS/app_data/status.txt"
+        self.logo_path = "SSU_LMS/app_data/header_logo.png"
         isDark_mode = int(open(self.dark_path,"r").read())
         self.isLoginPage = False
-        self.name_list, self.time_list, self.student_name = None, None, None
+        self.announcements, self.tasks, self.student_profile, self.subjects, self.links = None, None, None, None, None
         self.mainFont = tkFont.Font(family="Lucida Grande",size=18)
         if isDark_mode == 1:
             self.bg, self.fg, self.fg_gray = "black", "white", "white"
         else:
             self.bg, self.fg, self.fg_gray= "white", "black", "gray"
-        self.version = "1.4.0"
+        self.version = "2.0.0"
         #if os.path.isfile("app_info.txt") == False:
             #f = open(self.path, "w")
             #f.write("{}")
@@ -31,7 +31,7 @@ class App:
         if os.path.isfile(self.recent_path):
             try:
                 self.id, self.pw = open(self.recent_path,"r").read().split("\n")
-                self.name_list, self.time_list, self.student_name = SSU_login(self.id, self.pw)
+                self.announcements, self.tasks, self.student_profile, self.subjects, self.links = SSU_login(self.id, self.pw)
                 self.main_page()
             except:
                 messagebox.showerror("Error", "자동 로그인중 오류가 발생했습니다.\n로그인 화면으로 이동합니다.")
@@ -76,14 +76,14 @@ class App:
             try:
                 self.id = ID_entry.get()
                 self.pw = PW_entry.get()
-                self.name_list, self.time_list, self.student_name = SSU_login(self.id, self.pw)
+                self.announcements, self.tasks, self.student_profile, self.subjects, self.links = SSU_login(self.id, self.pw)
                 f = open(self.recent_path, "w")
                 f.write(f"{self.id}\n{self.pw}")
                 f.close()
-                print(self.name_list)
+                # print(self.name_list)
                 self.main_page()
-            except:
-                messagebox.showerror("LOGIN Fail", "학번 또는 비밀번호가 잘못되었습니다.")
+            except Exception as e:
+                messagebox.showerror("LOGIN Fail", f"학번 또는 비밀번호가 잘못되었습니다.{e}")
                 self.id, self.pw = None, None
         LOGIN_btn.config(text="LOGIN", command=login)
         LOGIN_btn.place(relx=0.548, rely=0.591)
@@ -101,13 +101,13 @@ class App:
         logo_img.config(image=self.img, bg="pale turquoise")
         logo_img.place(relx=0.05,rely=0.34)
 
-        Name_label = tk.Label(self.current_subframe, font=self.mainFont, text=f"{self.student_name} 학생\n학번 : {self.id}")
+        Name_label = tk.Label(self.current_subframe, font=self.mainFont, text=f"{self.student_profile["name"]} 학생\n학번 : {self.id}")
         Name_label.place(relx=0.16, rely=0.63)
         
         Task_label = tk.Label(self.current_frame, font=self.mainFont, text="Tasks List", fg=self.fg, bg=self.bg)
         Task_label.place(relx=0.04, rely=0.08)
 
-        n = len(self.name_list) if len(self.name_list) < 8 else 8
+        n = len(self.tasks) if len(self.tasks) < 8 else 8
     
         Task_fontStyle = tkFont.Font(family="Lucida Grande", size=10)
         danger_num, attent_num, safety_num, finish_num = 0, 0, 0, 0
@@ -115,7 +115,7 @@ class App:
             bg_c = ""
             ft_c = ""
             Task_btn = tk.Button(self.current_frame, font=Task_fontStyle)
-            rest_time = self.time_list[i]
+            rest_time = self.tasks[i][3]
             rest_time_rep = str(rest_time).replace("(","").replace(")","")
 
             if rest_time_rep.startswith("D-"):
@@ -144,8 +144,8 @@ class App:
                 bg_c = "white"
                 ft_c = "black"
             
-            Task_btn.config(text=str(self.name_list[i])+" "+str(rest_time), width=60, bg=bg_c, fg=ft_c)
-            Task_btn.place(relx=0.04, rely=0.2+(0.08*i))
+            Task_btn.config(text=f"{self.tasks[i][0]}\n{self.tasks[i][1]} ({self.tasks[i][3]})", width=60, bg=bg_c, fg=ft_c)
+            Task_btn.place(relx=0.04, rely=0.17+(0.1*i))
 
         def go_main():
             self.main_page()
@@ -156,17 +156,17 @@ class App:
         def go_weather():
             self.weather_page()
         
-        def go_bab():
-            self.bab_page()
+        def go_info():
+            self.info_page()
         
-        def go_gpt():
-            self.gpt_page()
+        def go_subj():
+            self.subj_page()
 
         btn_fontStyle = tkFont.Font(family="Lucida Grande",size=10)
         btn_width, btn_height, btn_dist = 6, 4, 0.2
-        bab_btn = tk.Button(self.current_subframe, font=btn_fontStyle, width=btn_width, height=btn_height)
-        bab_btn.config(text="학식", command=go_bab)
-        bab_btn.place(relx=0.0, rely=0.86)
+        info_btn = tk.Button(self.current_subframe, font=btn_fontStyle, width=btn_width, height=btn_height)
+        info_btn.config(text="공지", command=go_info)
+        info_btn.place(relx=0.0, rely=0.86)
 
         Wea_btn = tk.Button(self.current_subframe, font=btn_fontStyle, width=btn_width, height=btn_height)
         Wea_btn.config(text="날씨", command=go_weather)
@@ -176,9 +176,9 @@ class App:
         Home_btn.config(text="홈", command=go_main)
         Home_btn.place(relx=btn_dist * 2, rely=0.86)
 
-        dday_btn = tk.Button(self.current_subframe, font=btn_fontStyle, width=btn_width, height=btn_height)
-        dday_btn.config(text="GPT", command=go_gpt)
-        dday_btn.place(relx=btn_dist * 3, rely=0.86)
+        subj_btn = tk.Button(self.current_subframe, font=btn_fontStyle, width=btn_width, height=btn_height)
+        subj_btn.config(text="과목", command=go_subj)
+        subj_btn.place(relx=btn_dist * 3, rely=0.86)
         
         setting_btn = tk.Button(self.current_subframe, font=btn_fontStyle, width=btn_width, height=btn_height)
         setting_btn.config(text="설정", command=go_setting)
@@ -240,6 +240,8 @@ class App:
                                  fg=self.fg_gray, bg=self.bg)
         Version_label.place(relx=0.15, rely=0.94)
 
+    
+
     def weather_page(self):
         self.clear_frame()
         self.current_frame = tk.Frame(self.root, width=530, height=400, bg=self.bg)
@@ -275,23 +277,68 @@ class App:
                                  fg=check_status(weather_data[8+i])[1])
             stat_btn.place(relx=0.3 + dist[i], rely=0.58)
 
-    def bab_page(self):
+    def info_page(self):
         self.clear_frame()
         self.current_frame = tk.Frame(self.root, width=530, height=400, bg=self.bg)
         self.current_frame.pack(side="right")
 
-        Bab_label = tk.Label(self.current_frame, font=self.mainFont)
-        Bab_label.config(text="오늘의 학식", fg=self.fg, bg=self.bg)
-        Bab_label.place(relx=0.04, rely=0.08)
+        info_label = tk.Label(self.current_frame, font=self.mainFont)
+        sub_label = tk.Label(self.current_frame, font=tkFont.Font(family="Lucida Grande",size=10))
+        sub_label.config(text="*시험 키워드에 강조 표시", fg="gray", bg=self.bg)
+        info_label.config(text="공지사항", fg=self.fg, bg=self.bg)
+        info_label.place(relx=0.04, rely=0.08)
+        sub_label.place(relx=0.69, rely=0.12)
+        
+        info_fontStyle = tkFont.Font(family="Lucida Grande", size=10)
+        for i in range(len(self.announcements)):
+            def show_detail(idx=i):
+                title = self.announcements[idx][1]
+                content = self.announcements[idx][2]
+                self.info_message_page(f"{title}", content)
 
-    def gpt_page(self):
+            info_btn = tk.Button(self.current_frame, font=info_fontStyle,command=show_detail)
+            anno_title = self.announcements[i][1]
+            bg, fg = "white", "black"
+            important_words = ["고사", "시험", "테스트", "퀴즈", "test","exam","quiz"]
+            if any(important_word in str(anno_title).lower() for important_word in important_words):
+                bg = "yellow"
+            info_btn.config(text=f"{self.announcements[i][0]}\n{anno_title}", width=60, bg=bg, fg=fg)
+            info_btn.place(relx=0.04, rely=0.17+(0.1*i))
+
+    def info_message_page(self, title, text):
+        self.clear_frame()
+        def go_info():
+            self.info_page()
+        self.current_frame = tk.Frame(self.root, width=530, height=400, bg=self.bg)
+        self.current_frame.pack(side="right")
+        return_fontStyle = tkFont.Font(family="Lucida Grande", size=10)
+        return_btn = tk.Button(self.current_frame, font=return_fontStyle)
+        return_btn.config(text="돌아가기", command=go_info, bg="red", fg="white")
+        return_btn.place(relx=0.86, rely=0.92)
+        title_label = tk.Label(self.current_frame, font=self.mainFont)
+        title_label.config(text=f"{title}", fg=self.fg, bg=self.bg)
+        title_label.place(relx=0.04, rely=0.08)
+        text_label = tk.Label(self.current_frame, font=tkFont.Font(family="Lucida Grande",size=10))
+        text_label.config(text=f"{text}", fg=self.fg, bg=self.bg, wraplength=480, justify="left")
+        text_label.place(relx=0.04, rely=0.178)
+
+
+    def subj_page(self):
         self.clear_frame()
         self.current_frame = tk.Frame(self.root, width=530, height=400, bg=self.bg)
         self.current_frame.pack(side="right")
-
-        gpt_label = tk.Label(self.current_frame, font=self.mainFont)
-        gpt_label.config(text="GPT", fg=self.fg, bg=self.bg)
-        gpt_label.place(relx=0.04, rely=0.08)
+        subjectFont = tkFont.Font(family="Lucida Grande",size=10)
+        
+        subj_label = tk.Label(self.current_frame, font=self.mainFont)
+        subj_label.config(text="과목", fg=self.fg, bg=self.bg)
+        subj_label.place(relx=0.04, rely=0.08)
+        for i in range(len(self.subjects)):
+            subject_btn = tk.Button(self.current_frame, font=subjectFont)
+            subject_btn.config(text=self.subjects[i], width=60, bg="deep sky blue", fg="black", command=lambda url=self.links[i]: open_url(url))
+            subject_btn.place(relx=0.04, rely=0.2+(0.08*i))
+            sub_label = tk.Label(self.current_frame, font=tkFont.Font(family="Lucida Grande",size=10))
+            sub_label.config(text="*과목을 클릭하면 lms로 이동합니다.", fg="gray", bg=self.bg)
+            sub_label.place(relx=0.56, rely=0.145)
 
     def clear_frame(self):
         if self.current_frame is not None:
