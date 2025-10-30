@@ -15,7 +15,9 @@ LearningX에서 영상 마감일은 나오지 않는 단점을 보완한 프로�
 [SSU_lms 사용법] 
   1. SSU_lms 폴더를 설치 합니다.
   2. 아래의 필수 의존성을 설치합니다.
-      pip install pillow beautifulsoup4 requests cryptography
+  ```bash
+  pip install pillow beautifulsoup4 requests cryptography
+  ```
   3. 의존성이 설치된 Python 커널 환경에서 구동시킵니다.
 <hr/>
 
